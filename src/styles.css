@@ -1,0 +1,583 @@
+/* ------------------------------------------------------------------ */
+/*  Midnight. Dark by concept: the whole page is one night sky.        */
+/*  Shape rule: interactive = pill, panels = 14px, moon = circle.       */
+/*  Accent: one moon-gold. Indigo is ambient only.                     */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --bg: #06060d;
+  --ink: #f3f1fa;
+  --ink-2: rgba(243, 241, 250, 0.58);
+  --ink-3: rgba(243, 241, 250, 0.36);
+  --line: rgba(243, 241, 250, 0.12);
+  --line-strong: rgba(243, 241, 250, 0.26);
+  --glass: rgba(255, 255, 255, 0.045);
+  --glass-hover: rgba(255, 255, 255, 0.075);
+  --gold: #f2d99a;
+  --gold-soft: rgba(242, 217, 154, 0.45);
+  --moon-glow: rgba(255, 246, 216, 0.28);
+  --radius-panel: 14px;
+  --pulse: 0; /* music energy 0..1, set from the player */
+  --font: 'Quicksand Variable', Quicksand, ui-rounded, system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  background: var(--bg);
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-weight: 500;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection { background: rgba(242, 217, 154, 0.28); color: var(--ink); }
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+.midnight {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+}
+
+/* z-index scale: nebula 0, stars 1, moon 2, scenes 3, player 20 */
+
+.nebula {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60vmax 60vmax at 78% 12%, rgba(93, 79, 140, 0.22), transparent 60%),
+    radial-gradient(55vmax 55vmax at 12% 88%, rgba(45, 45, 90, 0.2), transparent 60%),
+    radial-gradient(40vmax 40vmax at 50% 55%, rgba(150, 140, 200, 0.05), transparent 65%);
+  animation: nebula-drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes nebula-drift {
+  from { transform: translate3d(-1.5%, -1%, 0) scale(1.02); }
+  to   { transform: translate3d(1.5%, 1.5%, 0) scale(1.06); }
+}
+
+.starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- moon */
+
+.moon-stage {
+  position: fixed;
+  top: -70px;
+  right: 11%;
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.moon {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 36% 32%, #fffef6 0%, #f1ecd8 38%, #d3ccb2 72%, #a8a28e 100%);
+  box-shadow:
+    inset -18px -22px 48px rgba(90, 84, 70, 0.25),
+    0 0 50px var(--moon-glow),
+    0 0 120px rgba(255, 248, 210, 0.16),
+    0 0 220px rgba(150, 140, 200, 0.1);
+  will-change: transform;
+}
+
+/* halo that breathes with the music */
+.moon::after {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 246, 216, 0.22), transparent 62%);
+  opacity: calc(0.35 + var(--pulse) * 0.65);
+  transform: scale(calc(0.9 + var(--pulse) * 0.25));
+  transition: opacity 0.12s linear, transform 0.12s linear;
+  pointer-events: none;
+}
+
+.crater {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(120, 115, 95, 0.14);
+  box-shadow:
+    inset 4px 4px 9px rgba(100, 95, 80, 0.12),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.18),
+    2px 2px 6px rgba(255, 255, 255, 0.1);
+}
+.crater-one   { width: 46px; height: 46px; top: 25%; left: 22%; }
+.crater-two   { width: 28px; height: 28px; top: 58%; left: 52%; }
+.crater-three { width: 66px; height: 66px; top: 42%; left: 65%; }
+.crater-four  { width: 16px; height: 16px; top: 18%; left: 58%; }
+.crater-five  { width: 22px; height: 22px; top: 72%; left: 30%; }
+
+/* ---------------------------------------------------------------- hero */
+
+.hero {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  will-change: transform, opacity;
+}
+
+.scene-night .hero { pointer-events: none; }
+
+.hero-inner {
+  width: min(1100px, 90%);
+  margin: 0 auto;
+  padding-top: 4vh;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 26px;
+}
+
+.title {
+  font-size: clamp(84px, 13vw, 176px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  margin-left: -0.04em;
+  padding-bottom: 0.06em;
+}
+
+.title .char {
+  background: linear-gradient(160deg, #ffffff 15%, #dcd7ea 60%, #aca6bf 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  display: inline-block;
+}
+
+.subtitle {
+  margin-top: 26px;
+  max-width: 320px;
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+/* ---------------------------------------------------------------- pills */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 34px;
+  padding: 15px 24px 15px 26px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--glass);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition:
+    background 0.3s var(--ease-out),
+    border-color 0.3s var(--ease-out),
+    transform 0.35s var(--ease-out),
+    box-shadow 0.35s var(--ease-out);
+}
+
+.pill-icon {
+  color: var(--ink-2);
+  transition: transform 0.35s var(--ease-out), color 0.3s;
+}
+
+.pill:hover {
+  background: var(--glass-hover);
+  border-color: var(--gold-soft);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 12px 36px rgba(0, 0, 0, 0.35),
+    0 0 0 6px rgba(242, 217, 154, 0.05);
+}
+.pill:hover .pill-icon { transform: translateX(4px); color: var(--gold); }
+.pill:hover .pill-icon-left { transform: translateX(-4px); }
+.pill:active { transform: translateY(0) scale(0.98); }
+
+/* ---------------------------------------------------------------- night */
+
+.night {
+  position: relative;
+  z-index: 3;
+  min-height: 100dvh;
+}
+
+.diary {
+  width: min(1100px, 90%);
+  margin: 0 auto;
+  padding: clamp(72px, 12vh, 120px) 0 140px;
+}
+
+.diary-head {
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto 64px;
+}
+
+.diary-head .eyebrow { margin-bottom: 20px; }
+
+.title-2 {
+  font-size: clamp(48px, 7vw, 84px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  background: linear-gradient(160deg, #ffffff 15%, #dcd7ea 60%, #aca6bf 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  padding-bottom: 0.08em;
+}
+
+.diary-intro {
+  max-width: 480px;
+  margin: 14px auto 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.diary-clock {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 26px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--glass);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.diary-time {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* constellation grid: five entries scattered like stars, one thread through them */
+
+.constellation {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(7, minmax(52px, auto));
+  gap: 22px;
+}
+
+.thread-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+  mix-blend-mode: screen;
+}
+.thread {
+  fill: none;
+  stroke: var(--gold);
+  stroke-opacity: 0.35;
+  stroke-width: 1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  visibility: hidden;
+}
+.thread-node {
+  fill: var(--gold);
+  fill-opacity: 0.16;
+  opacity: 0;
+  filter: drop-shadow(0 0 10px rgba(242, 217, 154, 0.7));
+}
+
+.entry {
+  position: relative;
+  z-index: 2;
+  align-self: start;
+  padding: 34px 30px 32px;
+  border-radius: var(--radius-panel);
+  border: 1px solid var(--line);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transition: border-color 0.4s var(--ease-out), background 0.4s var(--ease-out), transform 0.5s var(--ease-out);
+  will-change: transform, opacity;
+}
+
+/* soft light that spills from the panel's own star */
+.entry::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(240px circle at 36px 0, rgba(242, 217, 154, 0.13), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out);
+  pointer-events: none;
+}
+
+.entry:hover {
+  background: var(--glass-hover);
+  border-color: var(--line-strong);
+  transform: translateY(-3px);
+}
+.entry:hover::before { opacity: 1; }
+
+/* the entry's star: a small badge that sits on the panel's top edge, where the thread lands */
+.node {
+  position: absolute;
+  top: -15px;
+  left: 22px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: rgba(16, 15, 26, 0.92);
+  font-size: 15px;
+  line-height: 1;
+  color: var(--ink-2);
+  box-shadow: 0 0 0 4px var(--bg);
+  transition: color 0.4s, text-shadow 0.4s, border-color 0.4s, transform 0.5s var(--ease-out);
+}
+.entry:hover .node {
+  color: var(--gold);
+  border-color: var(--gold-soft);
+  text-shadow: 0 0 12px rgba(242, 217, 154, 0.9);
+  transform: scale(1.1);
+}
+
+.entry-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+
+.entry h3 {
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.entry-desc {
+  margin-top: 12px;
+  max-width: 320px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.entry-reading   { grid-area: 1 / 1 / 4 / 8; }
+.entry-learning  { grid-area: 1 / 8 / 3 / 13; }
+.entry-listening { grid-area: 4 / 6 / 6 / 10; }
+.entry-watching  { grid-area: 4 / 2 / 7 / 6; }
+.entry-making    { grid-area: 6 / 9 / 8 / 13; }
+
+/* the two roomy panels get a little more air */
+.entry-reading { padding: 44px 40px 44px; }
+.entry-reading h3 { font-size: 30px; }
+
+.diary-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 96px;
+  text-align: center;
+}
+.thought {
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.diary-foot .pill { margin-top: 26px; }
+
+/* ---------------------------------------------------------------- player */
+
+.music-player {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 14px 9px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(20, 18, 30, 0.6);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.35),
+    0 0 30px rgba(180, 170, 220, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: transform 0.35s var(--ease-out), background 0.3s, border-color 0.3s;
+  will-change: transform, opacity;
+}
+.music-player:hover {
+  background: rgba(30, 27, 42, 0.72);
+  border-color: var(--line-strong);
+  transform: translateY(-3px);
+}
+
+.music-button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s var(--ease-out), border-color 0.3s;
+}
+.music-button:hover {
+  background: rgba(242, 217, 154, 0.18);
+  border-color: var(--gold-soft);
+  transform: scale(1.08);
+}
+.music-button:active { transform: scale(0.96); }
+.play-icon { transform: translateX(1px); }
+
+.music-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 105px;
+}
+.music-note {
+  font-size: 17px;
+  color: var(--ink-2);
+}
+.music-note.is-playing { animation: note-float 2s ease-in-out infinite; color: var(--gold); }
+@keyframes note-float {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-3px) rotate(4deg); }
+}
+.music-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--ink); opacity: 0.9; }
+.music-artist { margin-top: 2px; font-size: 9px; letter-spacing: 0.04em; color: var(--ink-3); }
+
+.music-waves {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+  margin-left: 2px;
+  padding-right: 2px;
+}
+.music-waves span {
+  display: block;
+  width: 2.5px;
+  height: 18px;
+  border-radius: 10px;
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.35), var(--gold));
+  transform: scaleY(0.22);
+  transform-origin: bottom;
+  will-change: transform;
+}
+
+/* ---------------------------------------------------------------- mobile */
+
+@media (max-width: 760px) {
+  .moon-stage { top: -45px; right: -45px; }
+  .moon { width: 190px; height: 190px; }
+  .crater-one { width: 30px; height: 30px; }
+  .crater-three { width: 42px; height: 42px; }
+
+  .hero-inner { width: 86%; padding-top: 0; }
+  .eyebrow { letter-spacing: 0.3em; }
+  .title { font-size: clamp(66px, 21vw, 112px); letter-spacing: -0.035em; }
+  .subtitle { font-size: 16px; }
+
+  .diary { width: 90%; padding-top: 88px; padding-bottom: 120px; }
+  .diary-head { margin-bottom: 44px; }
+  .diary-intro { font-size: 14px; }
+
+  .constellation {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .constellation { padding-top: 6px; }
+  .entry,
+  .entry-reading { padding: 30px 24px 28px; }
+  .entry-reading h3 { font-size: 24px; }
+  .entry h3 { font-size: 20px; }
+
+  .diary-foot { margin-top: 64px; }
+
+  .music-player { right: 14px; bottom: 14px; gap: 9px; padding: 8px 12px 8px 8px; }
+  .music-info { min-width: 90px; }
+  .music-waves { display: none; }
+  .music-button { width: 32px; height: 32px; }
+}
+
+/* ---------------------------------------------------------------- motion prefs */
+
+@media (prefers-reduced-motion: reduce) {
+  .nebula { animation: none; }
+  .music-note.is-playing { animation: none; }
+  .moon::after { transition: none; }
+  .pill, .pill-icon, .entry, .music-player, .music-button { transition: none; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .pill, .entry, .music-player, .diary-clock {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(14, 13, 22, 0.94);
+  }
+}
